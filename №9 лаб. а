@@ -1,0 +1,40 @@
+import numpy as np
+ 
+def sort_diag_arr(a,b) :
+    n = len(a)
+    a = np.array(a)
+    b = np.array(b)
+    for i in range(n):
+        ind = np.abs(a[i:, i:n]).argmax()
+        row = ind // (n - i) + i
+        col = ind % (n - i) + i 
+        a[:,[i, col]] = a[:,[col, i]]
+        a[[i, row], :] = a[[row, i], :]
+        b[i], b[row] = b[row], b[i]
+    return a, b
+ 
+ 
+A = [
+[1,5,1],
+[4,-1,1],
+[25,7,66]]
+B = [29,20,1227]
+ 
+eps = 1e-3
+ 
+a, b = sort_diag_arr(A,B)
+diag = (1/np.diag(a)).reshape(-1,1)
+a[np.diag_indices_from(a)] = 0.
+a = np.hstack((-a, b.reshape(-1, 1))) * diag
+x = a[:,-1].ravel()
+x = np.append(x, 1)
+ 
+tmp = x.copy() + eps
+cnt = 0
+while abs(x-tmp).sum() > eps:
+    tmp = x.copy()
+    x = a.dot(x)
+    x = np.append(x, 1)
+    cnt += 1
+ 
+print(x[:-1].round(3), cnt)
